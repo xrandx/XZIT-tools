@@ -1,18 +1,3 @@
-## XZITAAO
-
-> 本项目是 http://jwc.xzit.edu.cn 的爬虫
->
-> 非常感谢[xrandx](https://github.com/xrandx)将其开源
->
-> 我现在把它整理出来供大家使用
-
-### 使用方法
-
-`pip install xzitaao`
-
-**Demo**
-
-```python
 import xzitaao
 
 Sid = "" #学号
@@ -33,12 +18,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-```
-
-### 已知 Bug
-
-验证码图片无法自己关掉，需要手动关
-
-### LICENSE
-
-[Apache License 2.0](LICENSE)
