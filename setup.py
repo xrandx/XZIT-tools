@@ -24,7 +24,7 @@ from setuptools import (setup, find_packages)
 
 setup(
     name="xzitaao",
-    version="0.0.3",
+    version="0.0.4",
     description="Crawler for xzit aao",
     author='Qualthera',
     author_email='qualthera@163.com',
