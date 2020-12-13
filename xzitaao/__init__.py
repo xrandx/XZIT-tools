@@ -1,4 +1,6 @@
 from PIL import Image
+import pytesseract
+import re
 import requests
 import time
 import shutil
@@ -47,6 +49,21 @@ def test(r, count):
     print("test 已保存为 " + count + ".html")
 
 
+def get_captcha(f, tesseract_dic):
+    image = Image.open(f, "r")
+    image = image.convert('L')
+    pixels = image.load()
+    for x in range(image.width):
+        for y in range(image.height):
+            if 140 <= pixels[x, y] <= 256:
+                pixels[x, y] = 255
+    testdata_dir_config = '--tessdata-dir ' + tesseract_dic
+    captcha = pytesseract.image_to_string(image, lang='eng',
+                                          config="-c tessedit_char_whitelist=0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ --psm 6")
+    time.sleep(0.3)
+    captcha = re.sub("\W", "", captcha)
+    return captcha
+
 
 class Student:
     sid = ''
@@ -55,7 +72,8 @@ class Student:
     status = ''
     session = None
     cookie = {'JSESSIONID': ''}
-
+    set_tesseract_flag = False
+    tesseract_dic = ""
 
     def __init__(self, sid, pwd, cid=''):
         self.sid = sid
@@ -74,6 +92,14 @@ class Student:
             shutil.rmtree(CAPS_FILE_PATH)
             os.mkdir(CAPS_FILE_PATH)
 
+    def set_tesseract_dic(self, tesseract_dic):
+        # self.set_tesseract_flag = False
+        if tesseract_dic:
+            self.tesseract_dic = tesseract_dic
+            self.set_tesseract_flag = True
+        else:
+            self.set_tesseract_flag = False
+
     def display(self):
         print(self.sid, self.pwd, self.cid)
 
@@ -90,9 +116,13 @@ class Student:
                 r = self.session.get(URL + r'validateCodeAction.do', headers=headers)  # 取得验证码
                 with open(CAPS_FILE_PATH + self.sid + 'capt.png', 'wb') as f:
                     f.write(r.content)
-                with Image.open (CAPS_FILE_PATH + self.sid +'capt.png') as f:
-                    f.show()
-                    captcha = input("请输入验证码:")
+                if self.set_tesseract_flag:
+                    with open(CAPS_FILE_PATH + self.sid + 'capt.png', 'rb') as f:
+                        captcha = get_captcha(f, self.tesseract_dic)
+                else:
+                    with Image.open(CAPS_FILE_PATH + self.sid + 'capt.png') as f:
+                        f.show()
+                        captcha = input("请输入验证码:")
                     # f.close()
                 self.cookie['JSESSIONID'] = r.cookies.get('JSESSIONID')
                 if len(captcha) == 4:
@@ -146,7 +176,7 @@ class Student:
             data = r.content
             with open(GRADE_FILE_PATH + self.sid + '_transcript.html', 'wb') as f:
                 f.write(data)
-            print("已保存为 " + GRADE_FILE_PATH +self.sid + "_Transcript.html")
+            print("已保存为 " + GRADE_FILE_PATH + self.sid + "_Transcript.html")
         else:
             print("成绩保存失败，正在重试")
             self.login()
@@ -174,7 +204,7 @@ class Student:
                 info = info[:-1]
                 info += " );"
                 try:
-                    with open(INFO_FILE_PATH+self.sid+"_info.txt","w") as f:
+                    with open(INFO_FILE_PATH + self.sid + "_info.txt", "w") as f:
                         f.write(info)
                         f.close()
                     print(info)
