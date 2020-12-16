@@ -299,7 +299,7 @@ class Student:
         }
         headers['Referer'] = URL + 'xkAction.do'
         r = self.session.post(URL + 'xkAction.do?actionType=2&pageNumber=-1&oper1=ori', data=search_data,
-                              headers=headers, cookies=self.cookie, stream=False, timeout=20)
+                              headers=headers, cookies=self.cookie, stream=False, timeout=60)
 
         course_data = {
             'kcId': self.cid,  # 所选课程格式 '课程号_课序号'
@@ -308,10 +308,10 @@ class Student:
         }  # 所选课程请求的表单
         headers['Referer'] = URL + 'xkAction.do?actionType=2&pageNumber=-1&oper1=ori'
         r = self.session.post(URL + 'xkAction.do', data=course_data, headers=headers, cookies=self.cookie, stream=False,
-                              timeout=20)
+                              timeout=60)
         time.sleep(1)
         r = self.session.get(URL + 'xkAction.do?actionType=7', headers=headers, cookies=self.cookie, stream=False,
-                             timeout=20)
+                             timeout=60)
         tmp = BeautifulSoup(r.text, 'lxml').get_text()
         if self.cid[:-3] in tmp:
             print("课序号" + self.cid + "成功")
@@ -326,13 +326,13 @@ class Student:
             'kcId': course
         }
         r = self.session.get(URL + 'xkAction.do?actionType=10&kcId=' + course, data=course_data,
-                             headers=headers, cookies=self.cookie, stream=False, timeout=20)
+                             headers=headers, cookies=self.cookie, stream=False, timeout=60)
         print(r.status_code)
         time.sleep(2)
 
     def own_course(self):
         r = self.session.get(URL + 'xkAction.do?actionType=7', headers=headers, cookies=self.cookie,
-                             stream=False, timeout=20)
+                             stream=False, timeout=60)
         r.encoding = 'GB2312'
         soup = BeautifulSoup(r.text, 'lxml')
         elems = soup.find_all("td", rowspan="1")
