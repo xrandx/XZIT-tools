@@ -34,7 +34,7 @@ def auto_ip():
     global headers
     global URL
     global HOST
-    ip_pool = ['211.87.126.77', '211.87.126.76', '211.87.126.78', '211.87.126.37']
+    ip_pool = ['211.87.126.77', '211.87.126.76', '211.87.126.78']
     ip_pool.remove(HOST)
     HOST = choice(ip_pool)
     headers["HOST"] = HOST
