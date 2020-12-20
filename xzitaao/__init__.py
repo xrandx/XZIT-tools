@@ -21,7 +21,7 @@ PIC_FILE_PATH = r"pictures/"
 CAPS_FILE_PATH = r"captcha/"
 GRADE_FILE_PATH = r"grade/"
 INFO_FILE_PATH = r"info/"
-HOST = '211.87.126.78'
+HOST = '211.87.126.77'
 URL = r"http://" + HOST + r"/"
 headers = {
     'User-Agent': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 10.0; WOW64; Trident/7.0; Touch; .NET4.0C; .NET4.0E; Tablet PC 2.0; .NET CLR 2.0.50727; .NET CLR 3.0.30729; .NET CLR 3.5.30729)',
