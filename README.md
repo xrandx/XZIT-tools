@@ -13,9 +13,7 @@
 **一些说明**
 
 `student.set_tesseract_dic("D:\\Program Files\\Tesseract-OCR\\tessdata")`设置`tesseract`目录（可选）
-如果没有设置，将会显示验证码，你需要自己手动输入
-
-由于教务系统有修改，所以选课功能暂时没法使用
+如果没有设置，将会显示验证码，你需要自己手动输
 
 **Demo**
 
@@ -24,7 +22,7 @@ import xzitaao
 
 Sid = ""  # 学号
 Pwd = ""  # 密码
-Cid = ""  # 选课的课程号
+Cid = ""  # 选课的课程号+课序号 例如1501G1343_02
 Tesseract_Dic = "D:\\Program Files\\Tesseract-OCR\\tessdata"
 
 def main():
@@ -35,7 +33,7 @@ def main():
         student.get_info()  # 保存个人信息
         student.save_score()  # 保存成绩单
         student.evaluate()  # 教学评估
-        # student.get_elective_course() #选课
+        student.get_elective_course() #选课
     except Exception as e:
         xzitaao.auto_ip()
         print(e)
