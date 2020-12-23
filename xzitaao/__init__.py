@@ -1,4 +1,6 @@
 from PIL import Image
+import pytesseract
+import re
 import requests
 import time
 import shutil
@@ -19,7 +21,7 @@ PIC_FILE_PATH = r"pictures/"
 CAPS_FILE_PATH = r"captcha/"
 GRADE_FILE_PATH = r"grade/"
 INFO_FILE_PATH = r"info/"
-HOST = '211.87.126.78'
+HOST = '211.87.126.77'
 URL = r"http://" + HOST + r"/"
 headers = {
     'User-Agent': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 10.0; WOW64; Trident/7.0; Touch; .NET4.0C; .NET4.0E; Tablet PC 2.0; .NET CLR 2.0.50727; .NET CLR 3.0.30729; .NET CLR 3.5.30729)',
@@ -32,7 +34,7 @@ def auto_ip():
     global headers
     global URL
     global HOST
-    ip_pool = ['211.87.126.77', '211.87.126.76', '211.87.126.78', '211.87.126.37']
+    ip_pool = ['211.87.126.77', '211.87.126.76', '211.87.126.78']
     ip_pool.remove(HOST)
     HOST = choice(ip_pool)
     headers["HOST"] = HOST
@@ -47,6 +49,21 @@ def test(r, count):
     print("test 已保存为 " + count + ".html")
 
 
+def get_captcha(f, tesseract_dic):
+    image = Image.open(f, "r")
+    image = image.convert('L')
+    pixels = image.load()
+    for x in range(image.width):
+        for y in range(image.height):
+            if 140 <= pixels[x, y] <= 256:
+                pixels[x, y] = 255
+    testdata_dir_config = '--tessdata-dir ' + tesseract_dic
+    captcha = pytesseract.image_to_string(image, lang='eng',
+                                          config="-c tessedit_char_whitelist=0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ --psm 6")
+    time.sleep(0.3)
+    captcha = re.sub("\W", "", captcha)
+    return captcha
+
 
 class Student:
     sid = ''
@@ -55,7 +72,8 @@ class Student:
     status = ''
     session = None
     cookie = {'JSESSIONID': ''}
-
+    set_tesseract_flag = False
+    tesseract_dic = ""
 
     def __init__(self, sid, pwd, cid=''):
         self.sid = sid
@@ -74,6 +92,14 @@ class Student:
             shutil.rmtree(CAPS_FILE_PATH)
             os.mkdir(CAPS_FILE_PATH)
 
+    def set_tesseract_dic(self, tesseract_dic):
+        # self.set_tesseract_flag = False
+        if tesseract_dic:
+            self.tesseract_dic = tesseract_dic
+            self.set_tesseract_flag = True
+        else:
+            self.set_tesseract_flag = False
+
     def display(self):
         print(self.sid, self.pwd, self.cid)
 
@@ -90,9 +116,13 @@ class Student:
                 r = self.session.get(URL + r'validateCodeAction.do', headers=headers)  # 取得验证码
                 with open(CAPS_FILE_PATH + self.sid + 'capt.png', 'wb') as f:
                     f.write(r.content)
-                with Image.open (CAPS_FILE_PATH + self.sid +'capt.png') as f:
-                    f.show()
-                    captcha = input("请输入验证码:")
+                if self.set_tesseract_flag:
+                    with open(CAPS_FILE_PATH + self.sid + 'capt.png', 'rb') as f:
+                        captcha = get_captcha(f, self.tesseract_dic)
+                else:
+                    with Image.open(CAPS_FILE_PATH + self.sid + 'capt.png') as f:
+                        f.show()
+                        captcha = input("请输入验证码:")
                     # f.close()
                 self.cookie['JSESSIONID'] = r.cookies.get('JSESSIONID')
                 if len(captcha) == 4:
@@ -146,7 +176,7 @@ class Student:
             data = r.content
             with open(GRADE_FILE_PATH + self.sid + '_transcript.html', 'wb') as f:
                 f.write(data)
-            print("已保存为 " + GRADE_FILE_PATH +self.sid + "_Transcript.html")
+            print("已保存为 " + GRADE_FILE_PATH + self.sid + "_Transcript.html")
         else:
             print("成绩保存失败，正在重试")
             self.login()
@@ -174,7 +204,7 @@ class Student:
                 info = info[:-1]
                 info += " );"
                 try:
-                    with open(INFO_FILE_PATH+self.sid+"_info.txt","w") as f:
+                    with open(INFO_FILE_PATH + self.sid + "_info.txt", "w") as f:
                         f.write(info)
                         f.close()
                     print(info)
@@ -269,7 +299,7 @@ class Student:
         }
         headers['Referer'] = URL + 'xkAction.do'
         r = self.session.post(URL + 'xkAction.do?actionType=2&pageNumber=-1&oper1=ori', data=search_data,
-                              headers=headers, cookies=self.cookie, stream=False, timeout=20)
+                              headers=headers, cookies=self.cookie, stream=False, timeout=60)
 
         course_data = {
             'kcId': self.cid,  # 所选课程格式 '课程号_课序号'
@@ -278,10 +308,10 @@ class Student:
         }  # 所选课程请求的表单
         headers['Referer'] = URL + 'xkAction.do?actionType=2&pageNumber=-1&oper1=ori'
         r = self.session.post(URL + 'xkAction.do', data=course_data, headers=headers, cookies=self.cookie, stream=False,
-                              timeout=20)
+                              timeout=60)
         time.sleep(1)
         r = self.session.get(URL + 'xkAction.do?actionType=7', headers=headers, cookies=self.cookie, stream=False,
-                             timeout=20)
+                             timeout=60)
         tmp = BeautifulSoup(r.text, 'lxml').get_text()
         if self.cid[:-3] in tmp:
             print("课序号" + self.cid + "成功")
@@ -296,13 +326,13 @@ class Student:
             'kcId': course
         }
         r = self.session.get(URL + 'xkAction.do?actionType=10&kcId=' + course, data=course_data,
-                             headers=headers, cookies=self.cookie, stream=False, timeout=20)
+                             headers=headers, cookies=self.cookie, stream=False, timeout=60)
         print(r.status_code)
         time.sleep(2)
 
     def own_course(self):
         r = self.session.get(URL + 'xkAction.do?actionType=7', headers=headers, cookies=self.cookie,
-                             stream=False, timeout=20)
+                             stream=False, timeout=60)
         r.encoding = 'GB2312'
         soup = BeautifulSoup(r.text, 'lxml')
         elems = soup.find_all("td", rowspan="1")

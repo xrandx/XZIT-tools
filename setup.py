@@ -24,7 +24,7 @@ from setuptools import (setup, find_packages)
 
 setup(
     name="xzitaao",
-    version="0.0.2",
+    version="0.0.6",
     description="Crawler for xzit aao",
     author='Qualthera',
     author_email='qualthera@163.com',
@@ -47,7 +47,7 @@ setup(
         'idna == 2.10',
         'kiwisolver == 1.3.1',
         'lxml == 4.6.2',
-        'numpy == 1.19.4',
+        'numpy == 1.19.3',
         'Pillow == 8.0.1',
         'pyparsing == 2.4.7',
         'python-dateutil == 2.8.1',
@@ -55,6 +55,8 @@ setup(
         'six == 1.15.0',
         'soupsieve == 2.1',
         'urllib3 == 1.26.2',
+        'pytesseract==0.3.6',
+
     ],
     packages=find_packages()
 )
