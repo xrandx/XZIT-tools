@@ -46,7 +46,7 @@ setup(
         'cycler == 0.10.0',
         'idna == 2.10',
         'kiwisolver == 1.3.1',
-        'lxml == 4.6.2',
+        'lxml == 4.6.3',
         'numpy == 1.19.3',
         'Pillow == 8.0.1',
         'pyparsing == 2.4.7',
