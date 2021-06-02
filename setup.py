@@ -54,7 +54,7 @@ setup(
         'requests == 2.25.0',
         'six == 1.15.0',
         'soupsieve == 2.1',
-        'urllib3 == 1.26.2',
+        'urllib3 == 1.26.5',
         'pytesseract==0.3.6',
 
     ],
