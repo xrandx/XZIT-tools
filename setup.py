@@ -47,7 +47,7 @@ setup(
         'idna == 2.10',
         'kiwisolver == 1.3.1',
         'lxml == 4.6.2',
-        'numpy == 1.19.3',
+        'numpy == 1.22.0',
         'Pillow == 8.0.1',
         'pyparsing == 2.4.7',
         'python-dateutil == 2.8.1',
